@@ -8,32 +8,44 @@ struct HistoryManager {
   }
 
   func canUndo() -> Bool {
-    return historyIdx >= 0
+    return self.historyIdx >= 0
   }
 
   func canRedo() -> Bool {
-    return historyIdx+1 < histories.count
+    return self.historyIdx+1 < self.histories.count
   }
 
-  func undo(move: (Int, Int) throws -> Void) throws {
+  mutating func undo() throws -> (from: Int, to: Int) {
     if !canUndo() {
-      return
+      throw MyError.Message("cannot undo")
     }
 
     let (from, to) = self.histories[self.historyIdx]
-    try move(from, to)
+    self.historyIdx -= 1
+
+    return (from, to)
   }
 
-  func redo(move: (Int, Int) throws -> Void) throws {
+  mutating func redo() throws -> (from: Int, to: Int) {
     if !canRedo() {
-      return
+      throw MyError.Message("cannot redo")
     }
 
-    let (from, to) = self.histories[self.historyIdx]
-    try move(to, from)
+    let (from, to) = self.histories[self.historyIdx+1]
+    self.historyIdx += 1
+
+    return (from, to)
   }
 
   mutating func save(from: Int, to: Int) {
+    while (self.historyIdx < self.histories.count-1) {
+      self.histories.removeLast()
+    }
+
     self.histories.append((from, to))
+    if self.historyIdx+1 != self.histories.count-1 {
+      print("wait bro.....\nthis is error\n\n\n")
+    }
+    self.historyIdx = self.histories.count - 1
   }
 }

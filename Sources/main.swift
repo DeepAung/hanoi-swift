@@ -5,10 +5,13 @@
 func main() {
   var hanoi = Hanoi()
   while !hanoi.isSolved() {
+    print("==========================")
     hanoi.printHanoi()
 
-    print("input the index of rod you want to move 'from' and move 'to")
-    print("input 2 number: ", terminator: "")
+    print("case 1: 2 number as index of rods you want to move \"from\" and move \"to\"")
+    print("case 2: type \"undo\"")
+    print("case 3: type \"redo\"")
+    print("input: ", terminator: "")
     if let input = readLine() {
       do {
         if input == "undo" {

@@ -29,7 +29,7 @@ struct Hanoi {
     self.indexs[0] = height-1
   }
 
-  mutating func move(from: Int, to: Int) throws {
+  mutating func move(from: Int, to: Int, saveHistory: Bool = true) throws {
     do {
       guard 0 <= from && from < self.height else {
         throw MyError.Message("invalid 'from' input")
@@ -56,7 +56,9 @@ struct Hanoi {
       self.indexs[to] += 1
       self.setTopDisk(to, value: topDisk)
 
-      historyManager.save(from: from, to: to)
+      if saveHistory {
+        historyManager.save(from: from, to: to)
+      }
     } catch {
       throw error
     }
@@ -70,16 +72,15 @@ struct Hanoi {
     self.towers[i][self.indexs[i]] = value
   }
 
+  // TODO: there must be a better for this
   mutating func undo() throws {
-    try self.historyManager.undo(move: { (from: Int, to: Int) in
-      try move(from: from, to: to)
-    })
+    let (from, to) = try self.historyManager.undo()
+    try move(from: to, to: from, saveHistory: false)
   }
 
   mutating func redo() throws {
-    try self.historyManager.redo(move: { (from: Int, to: Int) in
-      try move(from: from, to: to)
-    })
+    let (from, to) = try self.historyManager.redo()
+    try move(from: from, to: to, saveHistory: false)
   }
 
   func isSolved() -> Bool {
