@@ -1,51 +1,60 @@
 struct Hanoi {
-  var holes: Int
-  var length: Int
+  var rods: Int
+  var height: Int
+
+  // collect width of the each disk
   var towers: [[Int?]]
-  var curIdxs: [Int]
+
+  // current index of top disk at X rods
+  var indexs: [Int]
   private var historyManager: HistoryManager
 
   init() {
-    self.holes = 3
-    self.length = 3
-    self.towers = [[Int?]](repeating: [Int?](repeating: nil, count: length), count: holes)
-    self.curIdxs = [Int](repeating: -1, count: holes)
+    // TODO: make init function be able to customize the rods and height
+    self.rods = 3
+    self.height = 3
+
+    // int towers[rods][height] = {nil, nil, ...};
+    self.towers = [[Int?]](repeating: [Int?](repeating: nil, count: height), count: rods)
+    // int currentIndexOf[rods] = {-1, -1, ...};
+    self.indexs = [Int](repeating: -1, count: rods)
     self.historyManager = HistoryManager()
 
-    var tmp = length
-    for i in 0...length-1 {
+    // build one sorted hanoi tower on the most left
+    var tmp = height
+    for i in 0...height-1 {
       self.towers[0][i] = tmp
       tmp -= 1
     }
-    self.curIdxs[0] = length-1
+    self.indexs[0] = height-1
   }
 
   mutating func move(from: Int, to: Int) throws {
     do {
-      guard 0 <= from && from < self.length else {
+      guard 0 <= from && from < self.height else {
         throw MyError.Message("invalid 'from' input")
       }
-      guard 0 <= to && to < self.length else {
+      guard 0 <= to && to < self.height else {
         throw MyError.Message("invalid 'to' input")
       }
 
-      if self.curIdxs[from] == -1 {
-        throw MyError.Message("there is no block to pop")
+      if self.indexs[from] == -1 {
+        throw MyError.Message("there is no disk to pop")
       }
 
-      let topBlock = self.getTopBlock(from)!
+      let topDisk = self.getTopDisk(from)!
 
-      if self.curIdxs[to] == self.towers[to].count - 1 {
-        throw MyError.Message("full of blocks. cannot push more")
+      if self.indexs[to] == self.towers[to].count - 1 {
+        throw MyError.Message("full of disks. cannot push more")
       }
-      if self.curIdxs[to] != -1 && topBlock > self.getTopBlock(to)! {
-        throw MyError.Message("cannot put the larger block on top of the smaller block")
+      if self.indexs[to] != -1 && topDisk > self.getTopDisk(to)! {
+        throw MyError.Message("cannot put the larger disk on top of the smaller disk")
       }
 
-      self.setTopBlock(from, value: nil)
-      self.curIdxs[from] -= 1
-      self.curIdxs[to] += 1
-      self.setTopBlock(to, value: topBlock)
+      self.setTopDisk(from, value: nil)
+      self.indexs[from] -= 1
+      self.indexs[to] += 1
+      self.setTopDisk(to, value: topDisk)
 
       historyManager.save(from: from, to: to)
     } catch {
@@ -53,12 +62,12 @@ struct Hanoi {
     }
   }
 
-  func getTopBlock(_ i: Int) -> Int? {
-    return self.towers[i][self.curIdxs[i]]
+  func getTopDisk(_ i: Int) -> Int? {
+    return self.towers[i][self.indexs[i]]
   }
 
-  mutating func setTopBlock(_ i: Int, value: Int?) {
-    self.towers[i][self.curIdxs[i]] = value
+  mutating func setTopDisk(_ i: Int, value: Int?) {
+    self.towers[i][self.indexs[i]] = value
   }
 
   mutating func undo() throws {
@@ -75,26 +84,26 @@ struct Hanoi {
 
   func isSolved() -> Bool {
     let arr = self.towers.last!
-    var target = self.length
+    var expectedVal = self.height
     for val in arr {
-      if val != target {
+      if val != expectedVal {
         return false
       }
 
-      target -= 1
+      expectedVal -= 1
     }
 
     return true
   }
 
   func printHanoi() {
-    for i in 0...length-1 {
+    for i in 0...height-1 {
       print("[\(i)]", terminator: "\t")
     }
-    print("\n\n", terminator: "")
+    print()
 
-    for j in stride(from: self.length-1, through: 0, by: -1) {
-      for i in 0...self.holes-1 {
+    for j in stride(from: self.height-1, through: 0, by: -1) {
+      for i in 0...self.rods-1 {
         print(self.towers[i][j] ?? " ", terminator: "\t")
       }
       print()

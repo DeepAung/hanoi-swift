@@ -1,5 +1,5 @@
 struct HistoryManager {
-  var histories: [(Int, Int)]
+  var histories: [(Int, Int)] // collect the move (from: Int, to: Int)
   var historyIdx: Int
 
   init() {

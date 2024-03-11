@@ -7,6 +7,8 @@ func main() {
   while !hanoi.isSolved() {
     hanoi.printHanoi()
 
+    print("input the index of rod you want to move 'from' and move 'to")
+    print("input 2 number: ", terminator: "")
     if let input = readLine() {
       do {
         if input == "undo" {
